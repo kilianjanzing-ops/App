@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Abendrunde</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#232A3D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Abendrunde">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; overscroll-behavior-y: contain; }
+  body { font-family: 'IBM Plex Sans', sans-serif; }
+  .ht-display { font-family: 'Fraunces', serif; }
+  .ht-mono { font-family: 'IBM Plex Mono', monospace; }
+  input, textarea, button { font-family: inherit; }
+  button { cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  window.addEventListener('error', function (e) {
+    var root = document.getElementById('root');
+    if (root && !root.hasChildNodes()) {
+      root.innerHTML = '<div style="padding:24px;font-family:sans-serif;color:#232A3D;max-width:480px;margin:0 auto;">' +
+        '<h2 style="font-size:16px;">Fehler beim Laden</h2>' +
+        '<p style="white-space:pre-wrap;font-size:12px;color:#8B879A;line-height:1.5;">' +
+        (e.message || 'Unbekannter Fehler') +
+        (e.filename ? ('<br>' + e.filename + ':' + e.lineno) : '') +
+        '</p></div>';
+    }
+  });
+</script>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+
+<script>
+const { useState, useEffect, useMemo, useRef } = React;
+function Icon({ name, size = 18, style, className }) {
+  const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", style, className };
+  const paths = {
+    moon: /* @__PURE__ */ React.createElement("path", { d: "M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11Z" }),
+    heart: /* @__PURE__ */ React.createElement("path", { d: "M12 20.5s-7.5-4.7-9.8-9.4A5.4 5.4 0 0 1 12 6.2a5.4 5.4 0 0 1 9.8 4.9c-2.3 4.7-9.8 9.4-9.8 9.4Z" }),
+    footprints: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("circle", { cx: "8", cy: "7", r: "2.2" }), /* @__PURE__ */ React.createElement("path", { d: "M6 12v3a2 2 0 0 0 4 0v-1" }), /* @__PURE__ */ React.createElement("circle", { cx: "16", cy: "14", r: "2.2" }), /* @__PURE__ */ React.createElement("path", { d: "M14 19v-3a2 2 0 0 1 4 0v1" })),
+    wine: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M7 3h10l-1 7a4 4 0 0 1-8 0Z" }), /* @__PURE__ */ React.createElement("path", { d: "M12 14v7M9 21h6" })),
+    coffee: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z" }), /* @__PURE__ */ React.createElement("path", { d: "M17 9h1.5a2.3 2.3 0 0 1 0 4.6H17" }), /* @__PURE__ */ React.createElement("path", { d: "M7 4c0 1-1 1-1 2M11 4c0 1-1 1-1 2" })),
+    dumbbell: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("rect", { x: "2.5", y: "9", width: "3", height: "6", rx: "1" }), /* @__PURE__ */ React.createElement("rect", { x: "18.5", y: "9", width: "3", height: "6", rx: "1" }), /* @__PURE__ */ React.createElement("path", { d: "M5.5 12h13", strokeWidth: "3" })),
+    smartphone: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("rect", { x: "7", y: "2.5", width: "10", height: "19", rx: "2" }), /* @__PURE__ */ React.createElement("path", { d: "M11 19h2" })),
+    trendingUp: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M3 17l6-6 4 4 8-8" }), /* @__PURE__ */ React.createElement("path", { d: "M15 6h6v6" })),
+    calendar: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("rect", { x: "3.5", y: "5", width: "17", height: "16", rx: "2" }), /* @__PURE__ */ React.createElement("path", { d: "M8 3v4M16 3v4M3.5 10h17" })),
+    chevronLeft: /* @__PURE__ */ React.createElement("path", { d: "M15 6l-6 6 6 6" }),
+    chevronRight: /* @__PURE__ */ React.createElement("path", { d: "M9 6l6 6-6 6" }),
+    save: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M5 3h11l3 3v15H5Z" }), /* @__PURE__ */ React.createElement("path", { d: "M8 3v6h8V3M8 21v-7h8v7" })),
+    sparkles: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M12 3v4M12 17v4M3 12h4M17 12h4" }), /* @__PURE__ */ React.createElement("path", { d: "M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" })),
+    x: /* @__PURE__ */ React.createElement("path", { d: "M6 6l12 12M18 6L6 18" }),
+    download: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M12 4v11M8 11l4 4 4-4" }), /* @__PURE__ */ React.createElement("path", { d: "M5 19h14" })),
+    upload: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M12 19V8M8 12l4-4 4 4" }), /* @__PURE__ */ React.createElement("path", { d: "M5 19h14" })),
+    scales: /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("path", { d: "M12 3v18M7 7l-4 8a3.5 3.5 0 0 0 7 0Z" }), /* @__PURE__ */ React.createElement("path", { d: "M17 7l-4 8a3.5 3.5 0 0 0 7 0Z" }), /* @__PURE__ */ React.createElement("path", { d: "M6 7h12M9 3h6" }))
+  };
+  return /* @__PURE__ */ React.createElement("svg", { ...common }, paths[name]);
+}
+const STORAGE_KEY = "health-entries";
+const CUSTOM_HABITS_KEY = "health-custom-habits";
+const CUSTOM_METRICS_KEY = "health-custom-metrics";
+const WEEKDAYS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+const COLORS = {
+  ink: "#232A3D",
+  dusk: "#5B6B8C",
+  ember: "#E3A857",
+  sage: "#7A9B7E",
+  rose: "#C4707A",
+  plum: "#8B6C9C",
+  periwinkle: "#8CA0C4",
+  wine: "#9C4A5C",
+  forest: "#4E7A5E",
+  custom: "#5C8A8A",
+  mist: "#F3F1F6",
+  line: "#E1DFE6",
+  muted: "#8B879A"
+};
+function caffeineTiming(entry, wantLate) {
+  if (entry.caffeine !== true && entry.caffeine !== false) return null;
+  if (entry.caffeine === false) return false;
+  if (entry.caffeineLate !== true && entry.caffeineLate !== false) return null;
+  return wantLate ? entry.caffeineLate === true : entry.caffeineLate === false;
+}
+function exerciseTimeMatch(entry, wantTime) {
+  if (entry.exercise !== true && entry.exercise !== false) return null;
+  if (entry.exercise === false) return false;
+  if (entry.exerciseTime == null) return null;
+  return entry.exerciseTime === wantTime;
+}
+const HABITS = [
+  { key: "alcohol", label: "Alkohol", iconName: "wine" },
+  { key: "caffeine", label: "Koffein", iconName: "coffee" },
+  { key: "caffeineEarly", label: "Koffein fr\xFCh (vor 14 Uhr)", iconName: "coffee", getValue: (e) => caffeineTiming(e, false) },
+  { key: "caffeineLateHabit", label: "Koffein sp\xE4t (nach 14 Uhr)", iconName: "coffee", getValue: (e) => caffeineTiming(e, true) },
+  { key: "exercise", label: "Sport", iconName: "dumbbell" },
+  { key: "exerciseMorning", label: "Sport morgens", iconName: "dumbbell", getValue: (e) => exerciseTimeMatch(e, "morning") },
+  { key: "exerciseMidday", label: "Sport mittags", iconName: "dumbbell", getValue: (e) => exerciseTimeMatch(e, "midday") },
+  { key: "exerciseEvening", label: "Sport abends", iconName: "dumbbell", getValue: (e) => exerciseTimeMatch(e, "evening") },
+  { key: "screenBeforeBed", label: "Bildschirm vorm Schlafen", iconName: "smartphone" }
+];
+const METRICS = [
+  { key: "sleepScore", label: "Schlafscore", unit: "", color: COLORS.dusk, habitOffset: -1 },
+  { key: "sleepHours", label: "Schlafdauer", unit: "Std", color: COLORS.periwinkle, habitOffset: -1 },
+  { key: "restingHR", label: "Ruhepuls", unit: "bpm", color: COLORS.rose, habitOffset: -1 },
+  { key: "steps", label: "Schritte", unit: "", color: COLORS.sage },
+  { key: "mood", label: "Stimmung", unit: "/5", color: COLORS.ember },
+  { key: "stress", label: "Stress", unit: "/5", color: COLORS.plum },
+  { key: "alcoholUnits", label: "Alkoholmenge", unit: " Gl.", color: COLORS.wine },
+  { key: "exerciseIntensity", label: "Sport-Intensit\xE4t", unit: "/5", color: COLORS.forest }
+];
+function toDateStr(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function addDays(dateStr, days) {
+  const d = /* @__PURE__ */ new Date(dateStr + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return toDateStr(d);
+}
+function todayStr() {
+  return toDateStr(/* @__PURE__ */ new Date());
+}
+function formatDateLabel(dateStr) {
+  const d = /* @__PURE__ */ new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+}
+function emptyEntry(date) {
+  return {
+    date,
+    sleepHours: "",
+    sleepScore: "",
+    restingHR: "",
+    steps: "",
+    alcohol: null,
+    alcoholUnits: "",
+    caffeine: null,
+    caffeineLate: null,
+    exercise: null,
+    exerciseIntensity: "",
+    exerciseTime: null,
+    screenBeforeBed: null,
+    mood: null,
+    stress: null,
+    notes: ""
+  };
+}
+function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function saveJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.error("Speichern fehlgeschlagen:", e);
+    return false;
+  }
+}
+function triggerDownload(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportJSON(entries, customHabits, customMetrics) {
+  const payload = { exportedAt: (/* @__PURE__ */ new Date()).toISOString(), version: 1, entries, customHabits, customMetrics };
+  triggerDownload(JSON.stringify(payload, null, 2), `abendrunde-backup-${todayStr()}.json`, "application/json");
+}
+function csvEscape(v) {
+  if (v === null || v === void 0) return "";
+  const s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function exportCSV(entries, customHabits, customMetrics) {
+  const rows = Object.values(entries).sort((a, b) => a.date.localeCompare(b.date));
+  const baseCols = ["date", "sleepHours", "sleepScore", "restingHR", "steps", "alcohol", "alcoholUnits", "caffeine", "caffeineLate", "exercise", "exerciseIntensity", "exerciseTime", "screenBeforeBed", "mood", "stress", "notes"];
+  const cols = [...baseCols, ...customHabits.map((h) => h.key), ...customMetrics.map((m) => m.key)];
+  const header = cols.join(",");
+  const lines = rows.map((r) => cols.map((c) => csvEscape(r[c])).join(","));
+  triggerDownload([header, ...lines].join("\n"), `abendrunde-export-${todayStr()}.csv`, "text/csv");
+}
+function logGamma(x) {
+  const g = 7;
+  const c = [0.9999999999998099, 676.5203681218851, -1259.1392167224028, 771.3234287776531, -176.6150291621406, 12.507343278686905, -0.13857109526572012, 9984369578019572e-21, 15056327351493116e-23];
+  if (x < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * x)) - logGamma(1 - x);
+  x -= 1;
+  let a = c[0];
+  const t = x + g + 0.5;
+  for (let i = 1; i < g + 2; i++) a += c[i] / (x + i);
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function betacf(a, b, x) {
+  const MAXIT = 200, EPS = 3e-9, FPMIN = 1e-30;
+  const qab = a + b, qap = a + 1, qam = a - 1;
+  let c = 1, d = 1 - qab * x / qap;
+  if (Math.abs(d) < FPMIN) d = FPMIN;
+  d = 1 / d;
+  let h = d;
+  for (let m = 1; m <= MAXIT; m++) {
+    const m2 = 2 * m;
+    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+    d = 1 + aa * d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    h *= d * c;
+    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+    d = 1 + aa * d;
+    if (Math.abs(d) < FPMIN) d = FPMIN;
+    c = 1 + aa / c;
+    if (Math.abs(c) < FPMIN) c = FPMIN;
+    d = 1 / d;
+    const del = d * c;
+    h *= del;
+    if (Math.abs(del - 1) < EPS) break;
+  }
+  return h;
+}
+function betai(a, b, x) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  const bt = Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+  if (x < (a + 1) / (a + b + 2)) return bt * betacf(a, b, x) / a;
+  return 1 - bt * betacf(b, a, 1 - x) / b;
+}
+function tDistTwoTailedP(t, df) {
+  if (!isFinite(t)) return 0;
+  if (df <= 0) return 1;
+  const x = df / (df + t * t);
+  return betai(df / 2, 0.5, x);
+}
+function computeGroupStats(values) {
+  const n = values.length;
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  const variance = n > 1 ? values.reduce((s, v) => s + (v - mean) ** 2, 0) / (n - 1) : 0;
+  return { n, mean, variance };
+}
+function welchTTest(group1, group2) {
+  const s1 = computeGroupStats(group1), s2 = computeGroupStats(group2);
+  if (s1.n < 2 || s2.n < 2) return null;
+  const se2 = s1.variance / s1.n + s2.variance / s2.n;
+  const se = Math.sqrt(se2) || 1e-9;
+  const t = (s1.mean - s2.mean) / se;
+  let df;
+  if (s1.variance === 0 && s2.variance === 0) df = s1.n + s2.n - 2;
+  else {
+    const num = se2 * se2;
+    const denom = (s1.variance / s1.n) ** 2 / (s1.n - 1) + (s2.variance / s2.n) ** 2 / (s2.n - 1);
+    df = denom > 0 ? num / denom : s1.n + s2.n - 2;
+  }
+  const p = tDistTwoTailedP(Math.abs(t), Math.max(df, 1));
+  return { t, df, p, mean1: s1.mean, mean2: s2.mean, n1: s1.n, n2: s2.n };
+}
+function getHabitDayValue(entry, habit) {
+  if (!entry) return null;
+  return habit.getValue ? habit.getValue(entry) : entry[habit.key];
+}
+function streakTrue(entries, refDate, habit, n) {
+  let allTrue = true;
+  for (let i = 0; i < n; i++) {
+    const d = addDays(refDate, -i);
+    const v = getHabitDayValue(entries[d], habit);
+    if (v == null) return null;
+    if (v !== true) allTrue = false;
+  }
+  return allTrue;
+}
+function buildCandidates(allHabits) {
+  const candidates = [];
+  allHabits.forEach((h) => {
+    candidates.push({ key: h.key, label: h.label, iconName: h.iconName, mode: "single", getValue: h.getValue });
+    [2, 3].forEach((n) => {
+      candidates.push({ key: `streak${n}_${h.key}`, label: `${n}x in Folge: ${h.label}`, iconName: h.iconName, mode: "streak", n, base: h });
+    });
+  });
+  return candidates;
+}
+function evalCandidateAt(candidate, entries, refDate) {
+  if (candidate.mode === "streak") return streakTrue(entries, refDate, candidate.base, candidate.n);
+  return getHabitDayValue(entries[refDate], candidate);
+}
+function candidateComplexity(cand) {
+  let rank = cand.mode === "streak" ? cand.n === 3 ? 4 : 2 : 0;
+  const isDerived = cand.mode === "streak" ? !!(cand.base && cand.base.getValue) : !!cand.getValue;
+  return isDerived ? rank + 1 : rank;
+}
+function discoverInsights(sortedEntries, entries, allHabits, allMetrics) {
+  const candidates = buildCandidates(allHabits);
+  const results = [];
+  allMetrics.forEach((metric) => {
+    const offset = metric.habitOffset || 0;
+    candidates.forEach((cand) => {
+      const withIt = [], withoutIt = [], withDates = [], withoutDates = [];
+      sortedEntries.forEach((e) => {
+        if (e[metric.key] === "" || e[metric.key] == null) return;
+        const refDate = offset === 0 ? e.date : addDays(e.date, offset);
+        const val = evalCandidateAt(cand, entries, refDate);
+        if (val == null) return;
+        if (val) {
+          withIt.push(Number(e[metric.key]));
+          withDates.push(e.date);
+        } else {
+          withoutIt.push(Number(e[metric.key]));
+          withoutDates.push(e.date);
+        }
+      });
+      if (withIt.length < 3 || withoutIt.length < 3) return;
+      const test = welchTTest(withIt, withoutIt);
+      if (!test) return;
+      const signature = metric.key + "|T:" + withDates.sort().join(",") + "|F:" + withoutDates.sort().join(",");
+      results.push({ metric, candidate: cand, ...test, signature, complexity: candidateComplexity(cand) });
+    });
+  });
+  const bySignature = /* @__PURE__ */ new Map();
+  results.forEach((r) => {
+    const existing = bySignature.get(r.signature);
+    if (!existing || r.complexity < existing.complexity) bySignature.set(r.signature, r);
+  });
+  const deduped = Array.from(bySignature.values());
+  deduped.sort((a, b) => a.p - b.p);
+  return deduped.slice(0, 5);
+}
+function insightStrength(p) {
+  return p < 0.01 ? 3 : p < 0.05 ? 2 : p < 0.1 ? 1 : 0;
+}
+function insightHeadline(r) {
+  const better = r.mean1 > r.mean2;
+  const diff = Math.abs(r.mean1 - r.mean2);
+  const dayRef = r.metric.habitOffset ? " (Vortag)" : "";
+  return { lead: `${r.metric.label} ${better ? "h\xF6her" : "niedriger"} bei \u201E${r.candidate.label}"${dayRef}`, diff, unit: r.metric.unit, better };
+}
+function insightDetail(r) {
+  const confidence = r.p < 0.01 ? "sehr stark" : r.p < 0.05 ? "stark" : r.p < 0.1 ? "moderat" : "schwach";
+  return `${confidence}es Signal \xB7 p\u2248${r.p.toFixed(3)} \xB7 \xD8 ${r.mean1.toFixed(1)}${r.metric.unit} vs. ${r.mean2.toFixed(1)}${r.metric.unit} \xB7 n=${r.n1}/${r.n2}`;
+}
+function interactionTest(groupTT, groupFT, groupTF, groupFF) {
+  const s11 = computeGroupStats(groupTT), s01 = computeGroupStats(groupFT);
+  const s10 = computeGroupStats(groupTF), s00 = computeGroupStats(groupFF);
+  if ([s11, s01, s10, s00].some((s) => s.n < 3)) return null;
+  const d1 = s11.mean - s01.mean;
+  const d2 = s10.mean - s00.mean;
+  const varD1 = s11.variance / s11.n + s01.variance / s01.n;
+  const varD2 = s10.variance / s10.n + s00.variance / s00.n;
+  const se = Math.sqrt(varD1 + varD2) || 1e-9;
+  const interaction = d1 - d2;
+  const t = interaction / se;
+  const df = Math.max(1, Math.min(s11.n, s01.n, s10.n, s00.n) - 1);
+  const p = tDistTwoTailedP(Math.abs(t), df);
+  return { t, df, p, d1, d2, interaction, n11: s11.n, n01: s01.n, n10: s10.n, n00: s00.n };
+}
+function buildInteractionPairs(baseHabits) {
+  const pairs = [];
+  for (let i = 0; i < baseHabits.length; i++) {
+    for (let j = i + 1; j < baseHabits.length; j++) pairs.push([baseHabits[i], baseHabits[j]]);
+  }
+  return pairs;
+}
+function discoverInteractions(sortedEntries, entries, allHabits, allMetrics) {
+  const pairs = buildInteractionPairs(allHabits);
+  const results = [];
+  allMetrics.forEach((metric) => {
+    const offset = metric.habitOffset || 0;
+    pairs.forEach(([habitA, habitB]) => {
+      const groups = { tt: [], tf: [], ft: [], ff: [] };
+      sortedEntries.forEach((e) => {
+        if (e[metric.key] === "" || e[metric.key] == null) return;
+        const refDate = offset === 0 ? e.date : addDays(e.date, offset);
+        const habitEntry = entries[refDate];
+        if (!habitEntry) return;
+        const a = getHabitDayValue(habitEntry, habitA);
+        const b = getHabitDayValue(habitEntry, habitB);
+        if (a == null || b == null) return;
+        const key = (a ? "t" : "f") + (b ? "t" : "f");
+        groups[key].push(Number(e[metric.key]));
+      });
+      const test = interactionTest(groups.tt, groups.ft, groups.tf, groups.ff);
+      if (!test) return;
+      results.push({ metric, habitA, habitB, ...test });
+    });
+  });
+  results.sort((a, b) => a.p - b.p);
+  return results.slice(0, 3);
+}
+function interactionHeadline(r) {
+  const dayRef = r.metric.habitOffset ? " (Vortag)" : "";
+  return { lead: `\u201E${r.habitA.label}" wirkt auf ${r.metric.label} anders, wenn auch \u201E${r.habitB.label}" zutrifft${dayRef}`, d1: r.d1, d2: r.d2, unit: r.metric.unit };
+}
+function interactionDetail(r) {
+  const confidence = r.p < 0.01 ? "sehr stark" : r.p < 0.05 ? "stark" : r.p < 0.1 ? "moderat" : "schwach";
+  const sign = (v) => (v >= 0 ? "+" : "") + v.toFixed(1);
+  return `${confidence}es Signal \xB7 p\u2248${r.p.toFixed(3)} \xB7 mit ${r.habitB.label}: ${sign(r.d1)}${r.metric.unit} \xB7 ohne: ${sign(r.d2)}${r.metric.unit}`;
+}
+function buildContextStats(sortedEntries, allMetrics, excludeKeys) {
+  const dims = allMetrics.filter((m) => !excludeKeys.includes(m.key));
+  return dims.map((m) => {
+    const vals = sortedEntries.map((e) => e[m.key]).filter((v) => v !== "" && v != null).map(Number);
+    const mean = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+    const sd = vals.length > 1 ? Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / (vals.length - 1)) : 1;
+    return { key: m.key, mean, sd: sd || 1 };
+  });
+}
+function contextDistance(entryA, entryB, stats) {
+  let sumSq = 0, count = 0;
+  stats.forEach((s) => {
+    const a = entryA[s.key], b = entryB[s.key];
+    if (a === "" || a == null || b === "" || b == null) return;
+    const za = (Number(a) - s.mean) / s.sd, zb = (Number(b) - s.mean) / s.sd;
+    sumSq += (za - zb) ** 2;
+    count++;
+  });
+  if (count === 0) return null;
+  return Math.sqrt(sumSq / count);
+}
+function pairedTTest(diffs) {
+  const n = diffs.length;
+  if (n < 3) return null;
+  const mean = diffs.reduce((s, v) => s + v, 0) / n;
+  const variance = diffs.reduce((s, v) => s + (v - mean) ** 2, 0) / (n - 1);
+  const sd = Math.sqrt(variance) || 1e-9;
+  const se = sd / Math.sqrt(n);
+  const t = mean / se;
+  const df = n - 1;
+  const p = tDistTwoTailedP(Math.abs(t), df);
+  return { t, df, p, meanDiff: mean, n };
+}
+const MATCH_THRESHOLD = 1;
+function findMatchedPairs(sortedEntries, entries, treatmentHabit, outcomeMetric, allMetrics) {
+  const offset = outcomeMetric.habitOffset || 0;
+  const excludeKeys = [outcomeMetric.key, ...allMetrics.filter((m) => m.key.startsWith(treatmentHabit.key)).map((m) => m.key)];
+  const stats = buildContextStats(sortedEntries, allMetrics, excludeKeys);
+  const withT = [], withoutT = [];
+  sortedEntries.forEach((e) => {
+    if (e[outcomeMetric.key] === "" || e[outcomeMetric.key] == null) return;
+    const refDate = offset === 0 ? e.date : addDays(e.date, offset);
+    const habitEntry = entries[refDate];
+    if (!habitEntry) return;
+    const val = getHabitDayValue(habitEntry, treatmentHabit);
+    if (val == null) return;
+    const rec = { date: e.date, outcome: Number(e[outcomeMetric.key]), context: habitEntry };
+    (val ? withT : withoutT).push(rec);
+  });
+  const used = /* @__PURE__ */ new Set();
+  const pairs = [];
+  withT.forEach((t) => {
+    let best = null, bestDist = Infinity;
+    withoutT.forEach((c, idx) => {
+      if (used.has(idx)) return;
+      const dist = contextDistance(t.context, c.context, stats);
+      if (dist != null && dist < bestDist) {
+        bestDist = dist;
+        best = idx;
+      }
+    });
+    if (best != null && bestDist < MATCH_THRESHOLD) {
+      used.add(best);
+      pairs.push({ treatmentDate: t.date, controlDate: withoutT[best].date, distance: bestDist, diff: t.outcome - withoutT[best].outcome });
+    }
+  });
+  return pairs;
+}
+function matchedDayAnalysis(sortedEntries, entries, treatmentHabit, allMetrics) {
+  const results = [];
+  allMetrics.forEach((metric) => {
+    const pairs = findMatchedPairs(sortedEntries, entries, treatmentHabit, metric, allMetrics);
+    if (pairs.length < 3) return;
+    const test = pairedTTest(pairs.map((p) => p.diff));
+    if (!test) return;
+    results.push({ metric, pairs, ...test });
+  });
+  results.sort((a, b) => a.p - b.p);
+  return results;
+}
+function MiniLineChart({ data, color }) {
+  if (data.length < 2) return null;
+  const W = 300, H = 150, PAD = 26;
+  const values = data.map((d) => d.value);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const points = data.map((d, i) => ({
+    x: PAD + i / (data.length - 1) * (W - PAD * 2),
+    y: H - PAD - (d.value - min) / range * (H - PAD * 2)
+  }));
+  const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W} ${H}`, style: { width: "100%", height: 160 } }, /* @__PURE__ */ React.createElement("line", { x1: PAD, y1: H - PAD, x2: W - PAD, y2: H - PAD, stroke: COLORS.line, strokeWidth: "1" }), /* @__PURE__ */ React.createElement("path", { d: pathD, fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }), points.map((p, i) => /* @__PURE__ */ React.createElement("circle", { key: i, cx: p.x, cy: p.y, r: "3", fill: color })), /* @__PURE__ */ React.createElement("text", { x: PAD, y: H - 8, fontSize: "9", fontFamily: "IBM Plex Mono", fill: COLORS.muted }, data[0].date), /* @__PURE__ */ React.createElement("text", { x: W - PAD, y: H - 8, fontSize: "9", fontFamily: "IBM Plex Mono", fill: COLORS.muted, textAnchor: "end" }, data[data.length - 1].date), /* @__PURE__ */ React.createElement("text", { x: PAD, y: PAD - 8, fontSize: "9", fontFamily: "IBM Plex Mono", fill: COLORS.muted }, max.toFixed(1)), /* @__PURE__ */ React.createElement("text", { x: PAD, y: H - PAD + 12, fontSize: "9", fontFamily: "IBM Plex Mono", fill: COLORS.muted }, min.toFixed(1)));
+}
+function WeekdayChart({ data, color }) {
+  const valid = data.filter((d) => d.avg != null);
+  if (valid.length < 3) return null;
+  const W = 300, H = 130, PAD = 22;
+  const maxV = Math.max(...valid.map((d) => d.avg));
+  const minV = Math.min(...valid.map((d) => d.avg));
+  const range = maxV - minV || 1;
+  const barW = (W - PAD * 2) / data.length;
+  return /* @__PURE__ */ React.createElement("svg", { viewBox: `0 0 ${W} ${H}`, style: { width: "100%", height: 140 } }, /* @__PURE__ */ React.createElement("line", { x1: PAD, y1: H - PAD, x2: W - PAD, y2: H - PAD, stroke: COLORS.line, strokeWidth: "1" }), data.map((d, i) => {
+    const x = PAD + i * barW + barW * 0.22;
+    const w = barW * 0.56;
+    const h = d.avg == null ? 0 : Math.max(4, (d.avg - minV) / range * (H - PAD * 2 - 10) + 6);
+    const y = H - PAD - h;
+    return /* @__PURE__ */ React.createElement("g", { key: d.label }, d.avg != null && /* @__PURE__ */ React.createElement("rect", { x, y, width: w, height: h, rx: "3", fill: color, opacity: d.n < 2 ? 0.35 : 1 }), /* @__PURE__ */ React.createElement("text", { x: x + w / 2, y: H - 7, fontSize: "9", fontFamily: "IBM Plex Mono", fill: COLORS.muted, textAnchor: "middle" }, d.label));
+  }));
+}
+function HealthTracker() {
+  const [entries, setEntries] = useState({});
+  const [customHabits, setCustomHabits] = useState([]);
+  const [customMetrics, setCustomMetrics] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [tab, setTab] = useState("today");
+  const [currentDate, setCurrentDate] = useState(todayStr());
+  const [form, setForm] = useState(emptyEntry(todayStr()));
+  const [saveStatus, setSaveStatus] = useState("idle");
+  const [selectedMetric, setSelectedMetric] = useState("sleepScore");
+  useEffect(() => {
+    setEntries(loadJSON(STORAGE_KEY, {}));
+    setCustomHabits(loadJSON(CUSTOM_HABITS_KEY, []));
+    setCustomMetrics(loadJSON(CUSTOM_METRICS_KEY, []));
+    setLoaded(true);
+  }, []);
+  useEffect(() => {
+    if (!loaded) return;
+    setForm(entries[currentDate] || emptyEntry(currentDate));
+  }, [currentDate, loaded]);
+  function handleSave() {
+    const updated = { ...entries, [currentDate]: { ...form, date: currentDate } };
+    setEntries(updated);
+    setSaveStatus("saving");
+    const ok = saveJSON(STORAGE_KEY, updated);
+    if (ok) {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2e3);
+    } else setSaveStatus("error");
+  }
+  function addCustomHabit(label) {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const updated = [...customHabits, { key: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, label: trimmed }];
+    setCustomHabits(updated);
+    saveJSON(CUSTOM_HABITS_KEY, updated);
+  }
+  function removeCustomHabit(key) {
+    const updated = customHabits.filter((h) => h.key !== key);
+    setCustomHabits(updated);
+    saveJSON(CUSTOM_HABITS_KEY, updated);
+  }
+  function addCustomMetric(label, unit, habitOffset) {
+    const trimmed = label.trim();
+    if (!trimmed) return;
+    const updated = [...customMetrics, { key: `custom_metric_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, label: trimmed, unit: (unit || "").trim(), habitOffset: habitOffset || 0 }];
+    setCustomMetrics(updated);
+    saveJSON(CUSTOM_METRICS_KEY, updated);
+  }
+  function removeCustomMetric(key) {
+    const updated = customMetrics.filter((m) => m.key !== key);
+    setCustomMetrics(updated);
+    saveJSON(CUSTOM_METRICS_KEY, updated);
+  }
+  function handleImportData(data) {
+    const mergedEntries = { ...entries, ...data.entries || {} };
+    setEntries(mergedEntries);
+    saveJSON(STORAGE_KEY, mergedEntries);
+    const importedHabits = data.customHabits || [];
+    const existingHabitKeys = new Set(customHabits.map((h) => h.key));
+    const mergedHabits = [...customHabits, ...importedHabits.filter((h) => !existingHabitKeys.has(h.key))];
+    setCustomHabits(mergedHabits);
+    saveJSON(CUSTOM_HABITS_KEY, mergedHabits);
+    const importedMetrics = data.customMetrics || [];
+    const existingMetricKeys = new Set(customMetrics.map((m) => m.key));
+    const mergedMetrics = [...customMetrics, ...importedMetrics.filter((m) => !existingMetricKeys.has(m.key))];
+    setCustomMetrics(mergedMetrics);
+    saveJSON(CUSTOM_METRICS_KEY, mergedMetrics);
+  }
+  function updateField(key, value) {
+    setForm((f) => ({ ...f, [key]: value }));
+  }
+  function shiftDate(days) {
+    setCurrentDate(addDays(currentDate, days));
+  }
+  function jumpToDate(dateStr) {
+    if (dateStr) setCurrentDate(dateStr);
+  }
+  const sortedEntries = useMemo(
+    () => Object.values(entries).sort((a, b) => b.date.localeCompare(a.date)),
+    [entries]
+  );
+  const allHabits = useMemo(
+    () => [...HABITS, ...customHabits.map((h) => ({ ...h, iconName: "sparkles" }))],
+    [customHabits]
+  );
+  const allMetrics = useMemo(
+    () => [...METRICS, ...customMetrics.map((m) => ({ ...m, color: COLORS.custom, habitOffset: m.habitOffset || 0 }))],
+    [customMetrics]
+  );
+  const chartData = useMemo(() => {
+    return sortedEntries.filter((e) => e[selectedMetric] !== "" && e[selectedMetric] != null).map((e) => ({ date: formatDateLabel(e.date), value: Number(e[selectedMetric]) })).reverse();
+  }, [sortedEntries, selectedMetric]);
+  const correlations = useMemo(() => {
+    const currentMetric = allMetrics.find((m) => m.key === selectedMetric);
+    const offset = currentMetric && currentMetric.habitOffset || 0;
+    return allHabits.map((habit) => {
+      const withIt = [], withoutIt = [];
+      sortedEntries.forEach((e) => {
+        if (e[selectedMetric] === "" || e[selectedMetric] == null) return;
+        const habitEntry = offset === 0 ? e : entries[addDays(e.date, offset)];
+        if (!habitEntry) return;
+        const val = getHabitDayValue(habitEntry, habit);
+        if (val == null) return;
+        (val === true ? withIt : withoutIt).push(e);
+      });
+      if (withIt.length < 2 || withoutIt.length < 2) return { ...habit, enough: false };
+      const avg = (arr) => arr.reduce((s, e) => s + Number(e[selectedMetric]), 0) / arr.length;
+      return { ...habit, enough: true, withAvg: avg(withIt), withoutAvg: avg(withoutIt) };
+    });
+  }, [sortedEntries, selectedMetric, entries, allHabits, allMetrics]);
+  const insights = useMemo(
+    () => discoverInsights(sortedEntries, entries, allHabits, allMetrics),
+    [sortedEntries, entries, allHabits, allMetrics]
+  );
+  const interactions = useMemo(
+    () => discoverInteractions(sortedEntries, entries, allHabits, allMetrics),
+    [sortedEntries, entries, allHabits, allMetrics]
+  );
+  const metric = allMetrics.find((m) => m.key === selectedMetric);
+  return /* @__PURE__ */ React.createElement("div", { style: { minHeight: "100vh", backgroundColor: COLORS.mist, display: "flex", flexDirection: "column" } }, /* @__PURE__ */ React.createElement("header", { style: { backgroundColor: COLORS.ink, padding: "30px 22px 24px", borderRadius: "0 0 28px 28px" } }, /* @__PURE__ */ React.createElement("h1", { className: "ht-display", style: { color: "white", fontSize: 26, margin: 0 } }, "Abendrunde"), /* @__PURE__ */ React.createElement("p", { style: { color: "#AEB4C7", fontSize: 14, marginTop: 5 } }, "Gewohnheiten & Fitness im Blick")), /* @__PURE__ */ React.createElement("div", { style: { height: 4, background: `linear-gradient(90deg, ${COLORS.sage}, ${COLORS.ember}, ${COLORS.dusk})` } }), /* @__PURE__ */ React.createElement("main", { style: { flex: 1, overflowY: "auto", padding: "16px 16px 96px", maxWidth: 480, margin: "0 auto", width: "100%" } }, tab === "today" && /* @__PURE__ */ React.createElement(
+    TodayView,
+    {
+      currentDate,
+      form,
+      updateField,
+      shiftDate,
+      jumpToDate,
+      handleSave,
+      saveStatus,
+      customHabits,
+      addCustomHabit,
+      removeCustomHabit,
+      customMetrics,
+      addCustomMetric,
+      removeCustomMetric
+    }
+  ), tab === "history" && /* @__PURE__ */ React.createElement(HistoryView, { sortedEntries, customHabits, onSelect: (date) => {
+    setCurrentDate(date);
+    setTab("today");
+  } }), tab === "trends" && /* @__PURE__ */ React.createElement(
+    TrendsView,
+    {
+      sortedEntries,
+      entries,
+      chartData,
+      correlations,
+      selectedMetric,
+      setSelectedMetric,
+      metric,
+      allMetrics,
+      entryCount: sortedEntries.length,
+      insights,
+      interactions
+    }
+  ), tab === "matched" && /* @__PURE__ */ React.createElement(MatchedDaysView, { sortedEntries, entries, allHabits, allMetrics, entryCount: sortedEntries.length }), tab === "data" && /* @__PURE__ */ React.createElement(DataView, { entries, customHabits, customMetrics, onImport: handleImportData })), /* @__PURE__ */ React.createElement("nav", { style: { position: "fixed", bottom: 0, left: 0, right: 0, backgroundColor: "white", borderTop: `1px solid ${COLORS.line}` } }, /* @__PURE__ */ React.createElement("div", { style: { maxWidth: 480, margin: "0 auto", display: "flex", justifyContent: "space-around" } }, /* @__PURE__ */ React.createElement(TabButton, { iconName: "calendar", label: "Heute", active: tab === "today", onClick: () => setTab("today") }), /* @__PURE__ */ React.createElement(TabButton, { iconName: "moon", label: "Verlauf", active: tab === "history", onClick: () => setTab("history") }), /* @__PURE__ */ React.createElement(TabButton, { iconName: "trendingUp", label: "Trends", active: tab === "trends", onClick: () => setTab("trends") }), /* @__PURE__ */ React.createElement(TabButton, { iconName: "scales", label: "Vergleich", active: tab === "matched", onClick: () => setTab("matched") }), /* @__PURE__ */ React.createElement(TabButton, { iconName: "download", label: "Daten", active: tab === "data", onClick: () => setTab("data") }))));
+}
+function TabButton({ iconName, label, active, onClick }) {
+  return /* @__PURE__ */ React.createElement("button", { onClick, style: { background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 6px", flex: 1, color: active ? COLORS.dusk : COLORS.muted } }, /* @__PURE__ */ React.createElement("div", { style: { borderRadius: 999, padding: "5px 14px", backgroundColor: active ? COLORS.dusk + "1E" : "transparent", transition: "background-color 0.15s" } }, /* @__PURE__ */ React.createElement(Icon, { name: iconName, size: 18, style: { strokeWidth: active ? 2.5 : 2 } })), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 10, fontWeight: 600 } }, label));
+}
+function Card({ children, tint }) {
+  return /* @__PURE__ */ React.createElement("div", { style: {
+    backgroundColor: tint || "white",
+    borderRadius: 22,
+    padding: "16px 18px",
+    border: `1px solid ${COLORS.line}`,
+    boxShadow: "0 2px 14px rgba(35,42,61,0.06)"
+  } }, children);
+}
+function IconBadge({ iconName, color = COLORS.dusk, size = 36 }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { width: size, height: size, borderRadius: 999, backgroundColor: color + "20", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, /* @__PURE__ */ React.createElement(Icon, { name: iconName, size: Math.round(size * 0.52), style: { color } }));
+}
+function NumberField({ label, iconName, color, value, onChange, unit, placeholder, onRemove }) {
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12 } }, /* @__PURE__ */ React.createElement(IconBadge, { iconName, color }), /* @__PURE__ */ React.createElement("label", { style: { flex: 1, fontSize: 15, color: COLORS.ink } }, label), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "number",
+      inputMode: "decimal",
+      value,
+      onChange: (e) => onChange(e.target.value),
+      placeholder,
+      className: "ht-mono",
+      style: { width: 76, textAlign: "right", borderRadius: 12, padding: "8px 10px", fontSize: 15, border: `1px solid ${COLORS.line}`, backgroundColor: COLORS.mist }
+    }
+  ), unit && /* @__PURE__ */ React.createElement("span", { className: "ht-mono", style: { fontSize: 12, width: 32, color: COLORS.muted } }, unit), onRemove && /* @__PURE__ */ React.createElement("button", { onClick: onRemove, style: { background: "none", border: "none", color: COLORS.muted, flexShrink: 0, padding: 2 }, "aria-label": "Feld entfernen" }, /* @__PURE__ */ React.createElement(Icon, { name: "x", size: 16 }))));
+}
+function ToggleField({ label, iconName, color, value, onChange, extra, onRemove }) {
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12 } }, /* @__PURE__ */ React.createElement(IconBadge, { iconName, color }), /* @__PURE__ */ React.createElement("label", { style: { flex: 1, fontSize: 15, color: COLORS.ink } }, label), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 6 } }, /* @__PURE__ */ React.createElement("button", { onClick: () => onChange(true), style: { padding: "7px 14px", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", ...value === true ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Ja"), /* @__PURE__ */ React.createElement("button", { onClick: () => onChange(false), style: { padding: "7px 14px", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", ...value === false ? { backgroundColor: COLORS.ink, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Nein")), onRemove && /* @__PURE__ */ React.createElement("button", { onClick: onRemove, style: { background: "none", border: "none", color: COLORS.muted, flexShrink: 0, padding: 2 }, "aria-label": "Frage entfernen" }, /* @__PURE__ */ React.createElement(Icon, { name: "x", size: 16 }))), extra);
+}
+function ScaleField({ label, value, onChange }) {
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("label", { style: { fontSize: 15, color: COLORS.ink } }, label), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 10 } }, [1, 2, 3, 4, 5].map((n) => /* @__PURE__ */ React.createElement("button", { key: n, onClick: () => onChange(n), className: "ht-mono", style: { flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", ...value === n ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, n))));
+}
+function AddCustomHabit({ onAdd }) {
+  const [adding, setAdding] = useState(false);
+  const [text, setText] = useState("");
+  function submit() {
+    if (!text.trim()) return;
+    onAdd(text);
+    setText("");
+    setAdding(false);
+  }
+  if (!adding) {
+    return /* @__PURE__ */ React.createElement("button", { onClick: () => setAdding(true), style: { width: "100%", padding: "12px 0", borderRadius: 16, fontSize: 12, fontWeight: 600, border: `1.5px dashed ${COLORS.line}`, backgroundColor: "transparent", color: COLORS.dusk, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 } }, /* @__PURE__ */ React.createElement(Icon, { name: "sparkles", size: 14 }), " Eigene Frage hinzuf\xFCgen");
+  }
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "text",
+      autoFocus: true,
+      value: text,
+      onChange: (e) => setText(e.target.value),
+      onKeyDown: (e) => {
+        if (e.key === "Enter") submit();
+      },
+      placeholder: "z. B. Meditiert",
+      style: { flex: 1, borderRadius: 12, padding: "8px 12px", fontSize: 14, border: `1px solid ${COLORS.line}`, backgroundColor: COLORS.mist, color: COLORS.ink }
+    }
+  ), /* @__PURE__ */ React.createElement("button", { onClick: submit, style: { padding: "8px 14px", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", backgroundColor: COLORS.dusk, color: "white" } }, "OK"), /* @__PURE__ */ React.createElement("button", { onClick: () => {
+    setAdding(false);
+    setText("");
+  }, style: { background: "none", border: "none", color: COLORS.muted } }, /* @__PURE__ */ React.createElement(Icon, { name: "x", size: 16 }))));
+}
+function AddCustomMetric({ onAdd }) {
+  const [adding, setAdding] = useState(false);
+  const [label, setLabel] = useState("");
+  const [unit, setUnit] = useState("");
+  const [offset, setOffset] = useState(0);
+  function submit() {
+    if (!label.trim()) return;
+    onAdd(label, unit, offset);
+    setLabel("");
+    setUnit("");
+    setOffset(0);
+    setAdding(false);
+  }
+  if (!adding) {
+    return /* @__PURE__ */ React.createElement("button", { onClick: () => setAdding(true), style: { width: "100%", padding: "12px 0", borderRadius: 16, fontSize: 12, fontWeight: 600, border: `1.5px dashed ${COLORS.line}`, backgroundColor: "transparent", color: COLORS.dusk, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 } }, /* @__PURE__ */ React.createElement(Icon, { name: "sparkles", size: 14 }), " Eigenen Messwert hinzuf\xFCgen");
+  }
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 10 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8 } }, /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "text",
+      autoFocus: true,
+      value: label,
+      onChange: (e) => setLabel(e.target.value),
+      placeholder: "z. B. Gewicht",
+      style: { flex: 2, borderRadius: 12, padding: "8px 12px", fontSize: 14, border: `1px solid ${COLORS.line}`, backgroundColor: COLORS.mist, color: COLORS.ink }
+    }
+  ), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      type: "text",
+      value: unit,
+      onChange: (e) => setUnit(e.target.value),
+      placeholder: "Einheit (kg)",
+      style: { flex: 1, borderRadius: 12, padding: "8px 12px", fontSize: 14, border: `1px solid ${COLORS.line}`, backgroundColor: COLORS.mist, color: COLORS.ink }
+    }
+  )), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: COLORS.muted, flex: 1 } }, "Bezieht sich auf"), /* @__PURE__ */ React.createElement("button", { onClick: () => setOffset(0), style: { padding: "6px 12px", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", ...offset === 0 ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Heute"), /* @__PURE__ */ React.createElement("button", { onClick: () => setOffset(-1), style: { padding: "6px 12px", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", ...offset === -1 ? { backgroundColor: COLORS.ink, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Vortag")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8 } }, /* @__PURE__ */ React.createElement("button", { onClick: submit, style: { flex: 1, padding: "8px 14px", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", backgroundColor: COLORS.dusk, color: "white" } }, "Hinzuf\xFCgen"), /* @__PURE__ */ React.createElement("button", { onClick: () => {
+    setAdding(false);
+    setLabel("");
+    setUnit("");
+    setOffset(0);
+  }, style: { background: "none", border: "none", color: COLORS.muted } }, /* @__PURE__ */ React.createElement(Icon, { name: "x", size: 16 })))));
+}
+function TodayView({ currentDate, form, updateField, shiftDate, jumpToDate, handleSave, saveStatus, customHabits, addCustomHabit, removeCustomHabit, customMetrics, addCustomMetric, removeCustomMetric }) {
+  const isToday = currentDate === todayStr();
+  const dateInputRef = useRef(null);
+  const statusLabel = { saving: "Speichert\u2026", saved: "Gespeichert", error: "Fehler, nochmal versuchen", idle: "Eintrag speichern" }[saveStatus];
+  function confirmRemoveHabit(h) {
+    if (confirm(`\u201E${h.label}" wirklich l\xF6schen? Bereits erfasste Daten bleiben erhalten, nur die Frage verschwindet aus dem Formular.`)) removeCustomHabit(h.key);
+  }
+  function confirmRemoveMetric(m) {
+    if (confirm(`\u201E${m.label}" wirklich l\xF6schen? Bereits erfasste Daten bleiben erhalten, nur das Feld verschwindet aus dem Formular.`)) removeCustomMetric(m.key);
+  }
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 20 } }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } }, /* @__PURE__ */ React.createElement("button", { onClick: () => shiftDate(-1), style: { background: "none", border: "none", color: COLORS.dusk, padding: 4 } }, /* @__PURE__ */ React.createElement(Icon, { name: "chevronLeft", size: 18 })), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 14, fontWeight: 500, color: COLORS.ink } }, isToday ? "Heute" : formatDateLabel(currentDate), " ", /* @__PURE__ */ React.createElement("span", { className: "ht-mono", style: { color: COLORS.muted } }, "\xB7 ", currentDate)), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } }, /* @__PURE__ */ React.createElement("button", { onClick: () => dateInputRef.current && dateInputRef.current.click(), style: { background: "none", border: "none", color: COLORS.dusk, padding: 4 }, "aria-label": "Datum w\xE4hlen" }, /* @__PURE__ */ React.createElement(Icon, { name: "calendar", size: 17 })), /* @__PURE__ */ React.createElement(
+    "input",
+    {
+      ref: dateInputRef,
+      type: "date",
+      value: currentDate,
+      max: todayStr(),
+      onChange: (e) => jumpToDate(e.target.value),
+      style: { position: "absolute", width: 1, height: 1, opacity: 0, pointerEvents: "none" }
+    }
+  ), /* @__PURE__ */ React.createElement("button", { onClick: () => shiftDate(1), style: { background: "none", border: "none", color: COLORS.dusk, padding: 4 } }, /* @__PURE__ */ React.createElement(Icon, { name: "chevronRight", size: 18 }))))), /* @__PURE__ */ React.createElement("section", null, /* @__PURE__ */ React.createElement("h2", { style: { fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: COLORS.muted, margin: "0 0 4px 4px" } }, "Watch-Daten"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted, margin: "0 0 8px 4px" } }, "Schlaf & Ruhepuls: die Nacht davor. Schritte: heute."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, /* @__PURE__ */ React.createElement(NumberField, { label: "Schlafdauer", iconName: "moon", color: COLORS.dusk, unit: "Std", value: form.sleepHours, onChange: (v) => updateField("sleepHours", v), placeholder: "7.5" }), /* @__PURE__ */ React.createElement(NumberField, { label: "Schlafscore", iconName: "moon", color: COLORS.dusk, unit: "/100", value: form.sleepScore, onChange: (v) => updateField("sleepScore", v), placeholder: "80" }), /* @__PURE__ */ React.createElement(NumberField, { label: "Ruhepuls", iconName: "heart", color: COLORS.rose, unit: "bpm", value: form.restingHR, onChange: (v) => updateField("restingHR", v), placeholder: "58" }), /* @__PURE__ */ React.createElement(NumberField, { label: "Schritte", iconName: "footprints", color: COLORS.sage, unit: "", value: form.steps, onChange: (v) => updateField("steps", v), placeholder: "8000" }), customMetrics.map((m) => /* @__PURE__ */ React.createElement(NumberField, { key: m.key, label: m.label, iconName: "sparkles", color: COLORS.custom, unit: m.unit, value: form[m.key] === void 0 ? "" : form[m.key], onChange: (v) => updateField(m.key, v), placeholder: "", onRemove: () => confirmRemoveMetric(m) })), /* @__PURE__ */ React.createElement(AddCustomMetric, { onAdd: addCustomMetric }))), /* @__PURE__ */ React.createElement("section", null, /* @__PURE__ */ React.createElement("h2", { style: { fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: COLORS.muted, margin: "0 0 8px 4px" } }, "Abendfragen"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, /* @__PURE__ */ React.createElement(
+    ToggleField,
+    {
+      label: "Alkohol getrunken",
+      iconName: "wine",
+      color: COLORS.wine,
+      value: form.alcohol,
+      onChange: (v) => updateField("alcohol", v),
+      extra: form.alcohol === true && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 10, paddingLeft: 48, display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, flex: 1, color: COLORS.muted } }, "Wie viele Getr\xE4nke?"), /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "number",
+          inputMode: "decimal",
+          min: "0",
+          step: "0.5",
+          value: form.alcoholUnits,
+          onChange: (e) => updateField("alcoholUnits", e.target.value),
+          placeholder: "2",
+          className: "ht-mono",
+          style: { width: 64, textAlign: "right", borderRadius: 10, padding: "5px 8px", fontSize: 12, border: `1px solid ${COLORS.line}`, backgroundColor: COLORS.mist }
+        }
+      ))
+    }
+  ), /* @__PURE__ */ React.createElement(
+    ToggleField,
+    {
+      label: "Koffein getrunken",
+      iconName: "coffee",
+      color: COLORS.plum,
+      value: form.caffeine,
+      onChange: (v) => updateField("caffeine", v),
+      extra: form.caffeine === true && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 10, paddingLeft: 48, display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, flex: 1, color: COLORS.muted } }, "Nach 14 Uhr?"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 6 } }, /* @__PURE__ */ React.createElement("button", { onClick: () => updateField("caffeineLate", true), style: { padding: "5px 12px", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", ...form.caffeineLate === true ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Ja"), /* @__PURE__ */ React.createElement("button", { onClick: () => updateField("caffeineLate", false), style: { padding: "5px 12px", borderRadius: 10, fontSize: 12, fontWeight: 600, border: "none", ...form.caffeineLate === false ? { backgroundColor: COLORS.ink, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, "Nein")))
+    }
+  ), /* @__PURE__ */ React.createElement(
+    ToggleField,
+    {
+      label: "Sport gemacht",
+      iconName: "dumbbell",
+      color: COLORS.forest,
+      value: form.exercise,
+      onChange: (v) => updateField("exercise", v),
+      extra: form.exercise === true && /* @__PURE__ */ React.createElement("div", { style: { marginTop: 10, paddingLeft: 48, display: "flex", flexDirection: "column", gap: 8 } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: COLORS.muted, width: 68, flexShrink: 0 } }, "Intensit\xE4t"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 4, flex: 1 } }, [1, 2, 3, 4, 5].map((n) => /* @__PURE__ */ React.createElement("button", { key: n, onClick: () => updateField("exerciseIntensity", n), className: "ht-mono", style: { flex: 1, padding: "5px 0", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "none", ...form.exerciseIntensity === n ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, n)))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12, color: COLORS.muted, width: 68, flexShrink: 0 } }, "Zeitpunkt"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 4, flex: 1 } }, [["morning", "Morgens"], ["midday", "Mittags"], ["evening", "Abends"]].map(([val, lbl]) => /* @__PURE__ */ React.createElement("button", { key: val, onClick: () => updateField("exerciseTime", val), style: { flex: 1, padding: "5px 4px", borderRadius: 8, fontSize: 11, fontWeight: 600, border: "none", ...form.exerciseTime === val ? { backgroundColor: COLORS.dusk, color: "white" } : { backgroundColor: COLORS.mist, color: COLORS.muted } } }, lbl)))))
+    }
+  ), /* @__PURE__ */ React.createElement(ToggleField, { label: "Bildschirm kurz vorm Schlafen", iconName: "smartphone", color: COLORS.periwinkle, value: form.screenBeforeBed, onChange: (v) => updateField("screenBeforeBed", v) }), /* @__PURE__ */ React.createElement(ScaleField, { label: "Stimmung (1 schlecht \u2013 5 super)", value: form.mood, onChange: (v) => updateField("mood", v) }), /* @__PURE__ */ React.createElement(ScaleField, { label: "Stresslevel (1 entspannt \u2013 5 gestresst)", value: form.stress, onChange: (v) => updateField("stress", v) }), customHabits.map((h) => /* @__PURE__ */ React.createElement(ToggleField, { key: h.key, label: h.label, iconName: "sparkles", color: COLORS.custom, value: form[h.key] === void 0 ? null : form[h.key], onChange: (v) => updateField(h.key, v), onRemove: () => confirmRemoveHabit(h) })), /* @__PURE__ */ React.createElement(AddCustomHabit, { onAdd: addCustomHabit }))), /* @__PURE__ */ React.createElement(
+    "textarea",
+    {
+      value: form.notes,
+      onChange: (e) => updateField("notes", e.target.value),
+      placeholder: "Notizen (optional)",
+      rows: 2,
+      style: { width: "100%", backgroundColor: "white", borderRadius: 16, padding: "12px 16px", border: `1px solid ${COLORS.line}`, fontSize: 14, color: COLORS.ink, resize: "none" }
+    }
+  ), /* @__PURE__ */ React.createElement("button", { onClick: handleSave, style: { width: "100%", color: "white", borderRadius: 16, padding: "12px 0", fontWeight: 500, border: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, backgroundColor: COLORS.dusk, fontSize: 14 } }, /* @__PURE__ */ React.createElement(Icon, { name: "save", size: 18 }), " ", statusLabel));
+}
+function HistoryView({ sortedEntries, customHabits, onSelect }) {
+  if (sortedEntries.length === 0) return /* @__PURE__ */ React.createElement(EmptyState, { text: "Noch keine Eintr\xE4ge. Starte unten bei Heute." });
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, sortedEntries.map((e) => /* @__PURE__ */ React.createElement("button", { key: e.date, onClick: () => onSelect(e.date), style: { width: "100%", textAlign: "left", background: "none", border: "none", padding: 0 } }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, fontWeight: 500, color: COLORS.ink } }, formatDateLabel(e.date)), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, marginTop: 2, color: COLORS.muted } }, e.sleepScore !== "" && e.sleepScore != null ? /* @__PURE__ */ React.createElement("span", { className: "ht-mono" }, "Schlafscore ", e.sleepScore) : "keine Schlafdaten", e.alcohol === true ? " \xB7 Alkohol" : "", e.exercise === true ? " \xB7 Sport" : "", customHabits.filter((h) => e[h.key] === true).map((h) => ` \xB7 ${h.label}`).join(""))), /* @__PURE__ */ React.createElement(Icon, { name: "chevronRight", size: 16, style: { color: COLORS.line } }))))));
+}
+function StrengthDots({ value, color }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 3 } }, [0, 1, 2].map((i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { width: 6, height: 6, borderRadius: 999, backgroundColor: i < value ? color : COLORS.line } })));
+}
+function InfoToggle({ detail }) {
+  const [open, setOpen] = useState(false);
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(
+    "button",
+    {
+      onClick: () => setOpen((v) => !v),
+      "aria-label": "Details anzeigen",
+      style: {
+        width: 18,
+        height: 18,
+        borderRadius: 999,
+        border: `1px solid ${COLORS.line}`,
+        backgroundColor: open ? COLORS.mist : "transparent",
+        color: COLORS.muted,
+        fontSize: 10,
+        fontWeight: 700,
+        fontStyle: "italic",
+        fontFamily: "Georgia, serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        lineHeight: 1,
+        padding: 0
+      }
+    },
+    "i"
+  ), open && /* @__PURE__ */ React.createElement("p", { style: { fontSize: 11, color: COLORS.muted, marginTop: 6, lineHeight: 1.5 } }, detail));
+}
+function FindingCard({ iconName, color, lead, big, detail }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 12, alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement(IconBadge, { iconName, color, size: 34 }), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("p", { style: { fontSize: 14, color: COLORS.ink, margin: 0, lineHeight: 1.4 } }, lead, big != null && /* @__PURE__ */ React.createElement(React.Fragment, null, " ", /* @__PURE__ */ React.createElement("span", { className: "ht-mono", style: { fontWeight: 700, color } }, big))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginTop: 7 } }, /* @__PURE__ */ React.createElement(StrengthDots, { value: detail.strength, color }), /* @__PURE__ */ React.createElement(InfoToggle, { detail: detail.text }))));
+}
+function InsightsSection({ insights }) {
+  if (!insights || insights.length === 0) return null;
+  return /* @__PURE__ */ React.createElement(Card, { tint: `linear-gradient(155deg, ${COLORS.sage}12, ${COLORS.ember}12, ${COLORS.dusk}10)` }, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 18, fontWeight: 600, margin: "0 0 14px", color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement(Icon, { name: "sparkles", size: 18, style: { color: COLORS.ember } }), " Erkenntnisse"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 16 } }, insights.map((ins, i) => {
+    const h = insightHeadline(ins);
+    return /* @__PURE__ */ React.createElement(
+      FindingCard,
+      {
+        key: i,
+        iconName: ins.candidate.iconName,
+        color: ins.metric.color,
+        lead: h.lead,
+        big: `${h.better ? "+" : "\u2212"}${h.diff.toFixed(1)}${h.unit}`,
+        detail: { strength: insightStrength(ins.p), text: insightDetail(ins) }
+      }
+    );
+  })), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted, marginTop: 14 } }, "Automatisch aus vielen getesteten Kombinationen ausgew\xE4hlt (inkl. Mehrtages-Serien). Die Punkte zeigen die statistische St\xE4rke \u2014 mehr Details hinter dem i. Bei so vielen Tests k\xF6nnen auch zuf\xE4llige Muster auftauchen, als Denkansto\xDF gedacht."));
+}
+function InteractionsSection({ interactions }) {
+  if (!interactions || interactions.length === 0) return null;
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 16, fontWeight: 600, margin: "0 0 14px", color: COLORS.ink } }, "Wechselwirkungen"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 16 } }, interactions.map((r, i) => {
+    const h = interactionHeadline(r);
+    const strongerWithB = Math.abs(h.d1) > Math.abs(h.d2);
+    return /* @__PURE__ */ React.createElement(
+      FindingCard,
+      {
+        key: i,
+        iconName: r.habitA.iconName,
+        color: r.metric.color,
+        lead: h.lead,
+        big: strongerWithB ? `${h.d1 >= 0 ? "+" : ""}${h.d1.toFixed(1)}${h.unit}` : `${h.d2 >= 0 ? "+" : ""}${h.d2.toFixed(1)}${h.unit}`,
+        detail: { strength: insightStrength(r.p), text: interactionDetail(r) }
+      }
+    );
+  })), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted, marginTop: 14 } }, "Zeigt, wenn sich zwei Gewohnheiten gegenseitig beeinflussen, statt jede isoliert zu betrachten."));
+}
+function DoseResponseSection({ sortedEntries, entries, metric, allMetrics }) {
+  const candidates = allMetrics.filter((m) => m.key !== metric.key);
+  const [doseKey, setDoseKey] = useState(candidates[0] ? candidates[0].key : null);
+  const doseMetric = candidates.find((c) => c.key === doseKey);
+  const buckets = useMemo(() => doseKey ? computeDoseResponse(sortedEntries, entries, metric, doseKey) : null, [sortedEntries, entries, metric, doseKey]);
+  if (candidates.length === 0) return null;
+  return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 16, fontWeight: 600, margin: "0 0 4px", color: COLORS.ink } }, "Menge & Wirkung"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, margin: "0 0 10px", color: COLORS.muted } }, "Wie ver\xE4ndert sich ", metric.label, " mit der Menge von\u2026"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, marginBottom: 12 } }, candidates.map((c) => /* @__PURE__ */ React.createElement("button", { key: c.key, onClick: () => setDoseKey(c.key), style: { padding: "6px 12px", borderRadius: 999, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", ...doseKey === c.key ? { backgroundColor: COLORS.custom, color: "white", border: `1px solid ${COLORS.custom}` } : { backgroundColor: "white", color: COLORS.muted, border: `1px solid ${COLORS.line}` } } }, c.label))), buckets ? /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, buckets.map((b, i) => /* @__PURE__ */ React.createElement("div", { key: b.label }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", fontSize: 11, color: COLORS.muted, marginBottom: 2 } }, /* @__PURE__ */ React.createElement("span", null, b.label, " (", b.range[0].toFixed(1), "\u2013", b.range[1].toFixed(1), doseMetric ? doseMetric.unit : "", ")"), /* @__PURE__ */ React.createElement("span", { className: "ht-mono" }, b.avg != null ? `${b.avg.toFixed(1)}${metric.unit}` : "\u2013", b.n ? ` (n=${b.n})` : "")), /* @__PURE__ */ React.createElement("div", { style: { borderRadius: 4, height: 10, backgroundColor: COLORS.mist } }, b.avg != null && /* @__PURE__ */ React.createElement("div", { style: { height: 10, borderRadius: 4, backgroundColor: metric.color, opacity: 0.4 + i * 0.3, width: `${bucketBarWidth(buckets, b)}%` } }))))) : /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted } }, "Noch zu wenig Variation oder Daten f\xFCr diesen Vergleich."));
+}
+function bucketBarWidth(buckets, b) {
+  const vals = buckets.filter((x) => x.avg != null).map((x) => x.avg);
+  if (!vals.length) return 0;
+  const max = Math.max(...vals, 1e-3);
+  return b.avg != null ? b.avg / max * 100 : 0;
+}
+function computeDoseResponse(sortedEntries, entries, metric, doseKey) {
+  const offset = metric.habitOffset || 0;
+  const pairs = [];
+  sortedEntries.forEach((e) => {
+    if (e[metric.key] === "" || e[metric.key] == null) return;
+    const doseEntry = offset === 0 ? e : entries[addDays(e.date, offset)];
+    if (!doseEntry) return;
+    const doseVal = doseEntry[doseKey];
+    if (doseVal === "" || doseVal == null) return;
+    pairs.push({ dose: Number(doseVal), value: Number(e[metric.key]) });
+  });
+  if (pairs.length < 6) return null;
+  const doses = pairs.map((p) => p.dose);
+  const min = Math.min(...doses), max = Math.max(...doses);
+  if (max - min < 1e-4) return null;
+  const w = (max - min) / 3;
+  const buckets = [
+    { label: "Niedrig", range: [min, min + w], items: [] },
+    { label: "Mittel", range: [min + w, min + 2 * w], items: [] },
+    { label: "Hoch", range: [min + 2 * w, max], items: [] }
+  ];
+  pairs.forEach((p) => {
+    const idx = Math.min(2, Math.max(0, Math.floor((p.dose - min) / w)));
+    buckets[idx].items.push(p.value);
+  });
+  return buckets.map((b) => ({
+    label: b.label,
+    range: b.range,
+    n: b.items.length,
+    avg: b.items.length ? b.items.reduce((s, v) => s + v, 0) / b.items.length : null
+  }));
+}
+function TrendsView({ sortedEntries, entries, chartData, correlations, selectedMetric, setSelectedMetric, metric, allMetrics, entryCount, insights, interactions }) {
+  const weekdayRaw = useMemo(() => weekdayPattern(sortedEntries, selectedMetric), [sortedEntries, selectedMetric]);
+  const weekdayOrdered = useMemo(() => [1, 2, 3, 4, 5, 6, 0].map((i) => weekdayRaw[i]), [weekdayRaw]);
+  if (entryCount < 3) return /* @__PURE__ */ React.createElement(EmptyState, { text: `Noch ${3 - entryCount} Tag(e) bis zu den ersten Trends.` });
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 20 } }, /* @__PURE__ */ React.createElement(InsightsSection, { insights }), /* @__PURE__ */ React.createElement(InteractionsSection, { interactions }), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 } }, allMetrics.map((m) => /* @__PURE__ */ React.createElement("button", { key: m.key, onClick: () => setSelectedMetric(m.key), style: { padding: "7px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", ...selectedMetric === m.key ? { backgroundColor: COLORS.dusk, color: "white", border: `1px solid ${COLORS.dusk}` } : { backgroundColor: "white", color: COLORS.muted, border: `1px solid ${COLORS.line}` } } }, m.label))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 16, fontWeight: 600, margin: "0 0 12px", color: COLORS.ink } }, metric.label, " \xFCber Zeit"), chartData.length >= 2 ? /* @__PURE__ */ React.createElement(MiniLineChart, { data: chartData, color: metric.color }) : /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted } }, "Noch zu wenige Daten f\xFCr ", metric.label, ".")), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 16, fontWeight: 600, margin: "0 0 10px", color: COLORS.ink } }, "Wochentag-Muster"), weekdayOrdered.filter((d) => d.n > 0).length >= 4 ? /* @__PURE__ */ React.createElement(WeekdayChart, { data: weekdayOrdered, color: metric.color }) : /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted } }, "Noch zu wenig Daten pro Wochentag.")), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 16, fontWeight: 600, margin: "0 0 12px", color: COLORS.ink } }, "Was h\xE4ngt mit ", metric.label, " zusammen?"), metric.habitOffset ? /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, marginBottom: 12, color: COLORS.muted } }, "Verglichen mit den Gewohnheiten vom Vortag, da sich ", metric.label, " auf die Nacht davor bezieht.") : null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 12 } }, correlations.map((c) => /* @__PURE__ */ React.createElement("div", { key: c.key }, c.enough ? /* @__PURE__ */ React.createElement(CorrelationBar, { habit: c, metric }) : /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted } }, c.label, ": noch zu wenig Daten")))), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, marginTop: 12, color: COLORS.muted } }, "Durchschnittswerte aus deinen Eintr\xE4gen \u2013 ein Zusammenhang, keine Diagnose.")), /* @__PURE__ */ React.createElement(DoseResponseSection, { key: metric.key, sortedEntries, entries, metric, allMetrics }));
+}
+function CorrelationBar({ habit, metric }) {
+  const max = Math.max(habit.withAvg, habit.withoutAvg, 1e-3);
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 } }, /* @__PURE__ */ React.createElement(Icon, { name: habit.iconName, size: 14, style: { color: COLORS.muted } }), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13, color: COLORS.ink, fontWeight: 500 } }, habit.label)), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 4, color: COLORS.muted } }, /* @__PURE__ */ React.createElement("span", { style: { width: 36 } }, "Ja"), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, borderRadius: 999, height: 10, backgroundColor: COLORS.mist } }, /* @__PURE__ */ React.createElement("div", { style: { height: 10, borderRadius: 999, width: `${habit.withAvg / max * 100}%`, backgroundColor: COLORS.dusk } })), /* @__PURE__ */ React.createElement("span", { className: "ht-mono", style: { width: 48, textAlign: "right" } }, habit.withAvg.toFixed(1), metric.unit)), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: COLORS.muted } }, /* @__PURE__ */ React.createElement("span", { style: { width: 36 } }, "Nein"), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, borderRadius: 999, height: 10, backgroundColor: COLORS.mist } }, /* @__PURE__ */ React.createElement("div", { style: { height: 10, borderRadius: 999, width: `${habit.withoutAvg / max * 100}%`, backgroundColor: COLORS.ink } })), /* @__PURE__ */ React.createElement("span", { className: "ht-mono", style: { width: 48, textAlign: "right" } }, habit.withoutAvg.toFixed(1), metric.unit)));
+}
+function MatchedDaysView({ sortedEntries, entries, allHabits, allMetrics, entryCount }) {
+  const [habitKey, setHabitKey] = useState(allHabits[0] ? allHabits[0].key : null);
+  const habit = allHabits.find((h) => h.key === habitKey);
+  const results = useMemo(
+    () => habit ? matchedDayAnalysis(sortedEntries, entries, habit, allMetrics) : [],
+    [sortedEntries, entries, habit, allMetrics]
+  );
+  if (entryCount < 8) return /* @__PURE__ */ React.createElement(EmptyState, { text: "Noch zu wenig Daten f\xFCr den Vergleich \xE4hnlicher Tage \u2013 braucht mehr Historie als die anderen Ansichten." });
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 20 } }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("h3", { className: "ht-display", style: { fontSize: 17, fontWeight: 600, margin: "0 0 8px", color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 } }, /* @__PURE__ */ React.createElement(IconBadge, { iconName: "scales", color: COLORS.dusk, size: 30 }), " Vergleichbare Tage"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: COLORS.muted, margin: 0, lineHeight: 1.55 } }, "Sucht zu jedem Tag mit der gew\xE4hlten Gewohnheit den \xE4hnlichsten Tag ohne sie (\xE4hnliche Werte bei Schlaf, Schritten & Co.) und vergleicht nur innerhalb dieser Paare \u2014 so wird der Effekt isolierter sichtbar.")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 } }, allHabits.map((h) => /* @__PURE__ */ React.createElement("button", { key: h.key, onClick: () => setHabitKey(h.key), style: { padding: "7px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", ...habitKey === h.key ? { backgroundColor: COLORS.dusk, color: "white", border: `1px solid ${COLORS.dusk}` } : { backgroundColor: "white", color: COLORS.muted, border: `1px solid ${COLORS.line}` } } }, h.label))), results.length === 0 ? /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, color: COLORS.muted, margin: 0 } }, "Noch keine ausreichend \xE4hnlichen Tages-Paare f\xFCr \u201E", habit ? habit.label : "", '" gefunden. Braucht mehr Historie oder mehr Abwechslung in den Tagen.')) : /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 18 } }, results.map((r) => {
+    const avgDist = r.pairs.reduce((s, p) => s + p.distance, 0) / r.pairs.length;
+    const quality = avgDist < 0.4 ? "sehr hohe" : avgDist < 0.7 ? "gute" : "m\xE4\xDFige";
+    return /* @__PURE__ */ React.createElement(
+      FindingCard,
+      {
+        key: r.metric.key,
+        iconName: habit.iconName,
+        color: r.metric.color,
+        lead: `${r.metric.label} bei \u201E${habit.label}"`,
+        big: `${r.meanDiff >= 0 ? "+" : ""}${r.meanDiff.toFixed(1)}${r.metric.unit}`,
+        detail: { strength: insightStrength(r.p), text: `${quality} \xC4hnlichkeit der Paare \xB7 p\u2248${r.p.toFixed(3)} \xB7 n=${r.n} Paare` }
+      }
+    );
+  }))));
+}
+function DataView({ entries, customHabits, customMetrics, onImport }) {
+  const dates = Object.keys(entries).sort();
+  const count = dates.length;
+  const first = dates[0];
+  const fileInputRef = useRef(null);
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!confirm("Backup importieren und mit den aktuellen Daten zusammenf\xFChren? Bei gleichen Tagen gewinnt das Backup.")) {
+      e.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.entries) throw new Error("bad format");
+        onImport(data);
+        alert("Import erfolgreich.");
+      } catch (err) {
+        alert("Import fehlgeschlagen: Das ist keine g\xFCltige Abendrunde-Backup-Datei.");
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  }
+  return /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 20 } }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("p", { style: { fontSize: 14, color: COLORS.ink, margin: 0 } }, count === 0 ? "Noch keine Eintr\xE4ge." : /* @__PURE__ */ React.createElement(React.Fragment, null, count, " ", count === 1 ? "Tag" : "Tage", " protokolliert", first ? `, seit ${formatDateLabel(first)}` : "", "."))), /* @__PURE__ */ React.createElement("section", null, /* @__PURE__ */ React.createElement("h2", { style: { fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: COLORS.muted, margin: "0 0 8px 4px" } }, "Sichern"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } }, /* @__PURE__ */ React.createElement("button", { onClick: () => exportJSON(entries, customHabits, customMetrics), style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "12px 0", borderRadius: 18, fontWeight: 600, fontSize: 14, border: "none", backgroundColor: COLORS.dusk, color: "white", boxShadow: "0 3px 10px " + COLORS.dusk + "40" } }, /* @__PURE__ */ React.createElement(Icon, { name: "download", size: 18 }), " Als JSON exportieren (Backup)"), /* @__PURE__ */ React.createElement("button", { onClick: () => exportCSV(entries, customHabits, customMetrics), style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "12px 0", borderRadius: 18, fontWeight: 600, fontSize: 14, border: `1px solid ${COLORS.line}`, backgroundColor: "white", color: COLORS.ink } }, /* @__PURE__ */ React.createElement(Icon, { name: "download", size: 18 }), " Als CSV exportieren (f\xFCr Excel)")), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted, margin: "8px 4px 0" } }, "JSON ist das vollst\xE4ndige Backup zum Wiederherstellen. CSV ist zum Ansehen/Rechnen in Excel oder Google Sheets.")), /* @__PURE__ */ React.createElement("section", null, /* @__PURE__ */ React.createElement("h2", { style: { fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", color: COLORS.muted, margin: "0 0 8px 4px" } }, "Wiederherstellen"), /* @__PURE__ */ React.createElement("input", { ref: fileInputRef, type: "file", accept: "application/json", onChange: handleFile, style: { display: "none" } }), /* @__PURE__ */ React.createElement("button", { onClick: () => fileInputRef.current.click(), style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", padding: "12px 0", borderRadius: 18, fontWeight: 600, fontSize: 14, border: `1px solid ${COLORS.line}`, backgroundColor: "white", color: COLORS.ink } }, /* @__PURE__ */ React.createElement(Icon, { name: "upload", size: 18 }), " JSON-Backup importieren"), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 12, color: COLORS.muted, margin: "8px 4px 0" } }, "Nur JSON-Backups dieser App k\xF6nnen importiert werden.")));
+}
+function weekdayPattern(sortedEntries, metricKey) {
+  const buckets = WEEKDAYS.map((label) => ({ label, items: [] }));
+  sortedEntries.forEach((e) => {
+    if (e[metricKey] === "" || e[metricKey] == null) return;
+    const d = /* @__PURE__ */ new Date(e.date + "T00:00:00");
+    buckets[d.getDay()].items.push(Number(e[metricKey]));
+  });
+  return buckets.map((b) => ({
+    label: b.label,
+    n: b.items.length,
+    avg: b.items.length ? b.items.reduce((s, v) => s + v, 0) / b.items.length : null
+  }));
+}
+function EmptyState({ text }) {
+  return /* @__PURE__ */ React.createElement("div", { style: { textAlign: "center", padding: "56px 28px" } }, /* @__PURE__ */ React.createElement("div", { style: { width: 48, height: 48, borderRadius: 999, backgroundColor: COLORS.dusk + "18", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" } }, /* @__PURE__ */ React.createElement(Icon, { name: "sparkles", size: 22, style: { color: COLORS.dusk } })), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 14, color: COLORS.muted, lineHeight: 1.5, margin: 0 } }, text));
+}
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(/* @__PURE__ */ React.createElement(HealthTracker, null));
+
+</script>
+</body>
+</html>
